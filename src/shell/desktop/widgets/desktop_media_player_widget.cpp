@@ -52,6 +52,8 @@ void DesktopMediaPlayerWidget::create() {
       .color = m_color,
       .maxLines = 1,
   });
+  m_title->setAutoScroll(true);
+  m_title->setAutoScrollSpeed(1.0F);
   rootNode->addChild(std::move(title));
 
   auto artist = ui::label({
