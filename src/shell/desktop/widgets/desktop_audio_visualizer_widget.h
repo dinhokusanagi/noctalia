@@ -13,10 +13,12 @@ class DesktopAudioVisualizerWidget : public DesktopWidget {
 public:
   struct Options {
     int bands = 32;
+    bool blur = false;
     bool mirrored = true;
     bool reversed = false;
     bool centered = true;
     bool showWhenIdle = true;
+    float opacity = 1.0F;
     ColorSpec color1 = colorSpecFromRole(ColorRole::Primary);
     ColorSpec color2 = colorSpecFromRole(ColorRole::Primary);
   };
@@ -53,6 +55,9 @@ private:
   bool m_centered = true;
   bool m_showWhenIdle = false;
   bool m_editorPreview = false;
+  bool m_blur = false;
+  float m_opacity = 1.0F;
+  bool blur = false;
   ColorSpec m_color1 = colorSpecFromRole(ColorRole::Primary);
   ColorSpec m_color2 = colorSpecFromRole(ColorRole::Primary);
   std::uint64_t m_listenerId = 0;

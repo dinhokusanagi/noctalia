@@ -22,6 +22,8 @@ public:
     float waveThickness = 1.0F;
     float innerDiameter = 0.7F;
     bool fadeWhenIdle = true;
+    bool blur = false;
+    float opacity = 1.0F;
     ColorSpec primaryColor = colorSpecFromRole(ColorRole::Primary);
     ColorSpec secondaryColor = colorSpecFromRole(ColorRole::Secondary);
   };
@@ -29,10 +31,10 @@ public:
   DesktopFancyAudioVisualizerWidget(PipeWireSpectrum* spectrum, Options options);
   ~DesktopFancyAudioVisualizerWidget() override;
 
-  void create() override;
+   void create() override;
   bool applySetting(
-      const std::string& key, const WidgetSettingValue& value,
-      const std::unordered_map<std::string, WidgetSettingValue>& allSettings, Renderer& renderer
+    const std::string& key, const WidgetSettingValue& value,
+    const std::unordered_map<std::string, WidgetSettingValue>& allSettings, Renderer& renderer
   ) override;
   void setEditorPreview(bool enabled) noexcept override;
   [[nodiscard]] bool needsFrameTick() const override;
@@ -63,6 +65,8 @@ private:
   float m_waveThickness;
   float m_innerDiameter;
   bool m_fadeWhenIdle;
+  bool m_blur;
+  float m_opacity;
   ColorSpec m_primaryColor;
   ColorSpec m_secondaryColor;
 

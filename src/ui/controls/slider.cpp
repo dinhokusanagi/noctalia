@@ -270,8 +270,7 @@ void Slider::setPlayingEffect(bool enabled) {
         markPaintDirty();
 
         m_playingAnimId = animationManager()->animateTimer(
-            0.0F, 0.0F, 500.0F, Easing::Linear,
-            [](float) {},
+            0.0F, 0.0F, 500.0F, Easing::Linear, [](float) {},
             [this]() {
               m_playingAnimId = 0;
 
@@ -380,14 +379,10 @@ void Slider::applyVisualState() {
 
     fillColor = brighten(fillColor, 1.0F + pulse * 0.18F);
 
-    thumbBorder = brighten(
-        resolved(ColorRole::Primary),
-        1.0F + pulse * 0.30F
-    );
+    thumbBorder = brighten(resolved(ColorRole::Primary), 1.0F + pulse * 0.30F);
   }
 
-
-    auto trackStyle = solidStyle(trackColor, m_trackHeight * 0.5F);
+  auto trackStyle = solidStyle(trackColor, m_trackHeight * 0.5F);
   m_track->setStyle(trackStyle);
 
   auto fillStyle = solidStyle(fillColor, m_trackHeight * 0.5F);
@@ -396,7 +391,7 @@ void Slider::applyVisualState() {
   auto thumbStyle = solidStyle(thumbColor, m_thumbSizePx * 0.5F);
   thumbStyle.border = thumbBorder;
 
-    if (m_playingEffect && m_enabled && !pressing) {
+  if (m_playingEffect && m_enabled && !pressing) {
     const float pulse = [&]() {
       if (m_playingPulse <= 0.5F) {
         const float t = m_playingPulse * 2.0F;
@@ -407,11 +402,9 @@ void Slider::applyVisualState() {
       return 1.0F - t * t * t;
     }();
 
-    thumbStyle.borderWidth =
-        Style::borderWidth + pulse * Style::borderWidth * 1.5F;
+    thumbStyle.borderWidth = Style::borderWidth + pulse * Style::borderWidth * 1.5F;
   } else {
-    thumbStyle.borderWidth =
-        focused ? Style::focusRingWidth : Style::borderWidth;
+    thumbStyle.borderWidth = focused ? Style::focusRingWidth : Style::borderWidth;
   }
 
   m_thumb->setStyle(thumbStyle);

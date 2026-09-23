@@ -180,33 +180,33 @@ namespace desktop_settings {
       };
     }
 
-    if (type == "button") {
-      return {};
-    }
 
-    const WidgetSettingVisibility backgroundOn{"background", {"true"}};
-    const bool backgroundDefault = type != "fancy_audio_visualizer";
+   const bool backgroundDefault = type != "fancy_audio_visualizer";
 
-    auto bgColor = colorSpec("background_color", "surface");
-    bgColor.visibleWhen = backgroundOn;
+   
+const WidgetSettingVisibility backgroundOn{"background", {"true"}};
+  
+   auto bgColor = colorSpec("background_color", "surface");
+   bgColor.visibleWhen = backgroundOn;
+  
+   auto bgRadius = intSpec("background_radius", 12.0, 0.0, 32.0, 1.0);
+   bgRadius.visibleWhen = backgroundOn;
+  
+   auto bgPadding = intSpec("background_padding", 10.0, 0.0, 32.0, 1.0);
+   bgPadding.visibleWhen = backgroundOn;
+  
+   auto bgOpacity = doubleSpec("background_opacity", 0.8, 0.0, 1.0, 0.01);
+   bgOpacity.visibleWhen = backgroundOn;
+  
+   return {
+      boolSpec("background", backgroundDefault),
+      std::move(bgColor),
+      std::move(bgOpacity),
+      std::move(bgRadius),
+      std::move(bgPadding),
+   };
+  }    
 
-    auto bgRadius = intSpec("background_radius", 12.0, 0.0, 32.0, 1.0);
-    bgRadius.visibleWhen = backgroundOn;
-
-    auto bgPadding = intSpec("background_padding", 10.0, 0.0, 32.0, 1.0);
-    bgPadding.visibleWhen = backgroundOn;
-
-    auto bgOpacity = doubleSpec("background_opacity", 0.8, 0.0, 1.0, 0.01);
-    bgOpacity.visibleWhen = backgroundOn;
-
-    return {
-        boolSpec("background", backgroundDefault),
-        std::move(bgColor),
-        std::move(bgOpacity),
-        std::move(bgRadius),
-        std::move(bgPadding),
-    };
-  }
 
   std::vector<WidgetSettingSpec> desktopWidgetSettingSpecs(std::string_view type) {
     if (auto pluginEntry = resolvePluginDesktopWidget(type)) {
@@ -275,13 +275,14 @@ namespace desktop_settings {
       circle.visibleWhen = analogOnly;
       add(std::move(circle));
     } else if (type == "audio_visualizer") {
-      add(intSpec("bands", 32, 4.0, 128.0, 4.0));
-      add(boolSpec("mirrored", true));
-      add(boolSpec("reversed", false));
-      add(boolSpec("centered", true));
-      add(boolSpec("show_when_idle", true));
-      add(colorSpec("color_1", "primary"));
-      add(colorSpec("color_2", "primary"));
+       add(intSpec("bands", 62, 4, 1000, 4));
+       add(boolSpec("mirrored", true));
+       add(boolSpec("reversed", false));
+       add(boolSpec("centered", true));
+       add(boolSpec("show_when_idle", true));
+       add(doubleSpec("opacity", 100, 0.0, 100, 1.0));
+       add(colorSpec("color_1", "primary"));
+       add(colorSpec("color_2", "primary"));
     } else if (type == "fancy_audio_visualizer") {
       const WidgetSettingVisibility barsVisible{"visualization_mode", {"bars", "bars_rings", "all"}};
       const WidgetSettingVisibility waveVisible{"visualization_mode", {"wave", "wave_rings", "all"}};
@@ -298,18 +299,24 @@ namespace desktop_settings {
       ));
       add(doubleSpec("sensitivity", 1.5, 0.5, 3.0, 0.1));
       add(doubleSpec("rotation_speed", 0.5, 0.0, 2.0, 0.1));
-      auto barWidth = doubleSpec("bar_width", 0.6, 0.2, 1.0, 0.1);
+
+      auto barWidth = doubleSpec("bar_width", 0.6, 0.1, 5.0, 0.1);
       barWidth.visibleWhen = barsVisible;
       add(std::move(barWidth));
+
       auto waveThickness = doubleSpec("wave_thickness", 1.0, 0.3, 2.0, 0.1);
       waveThickness.visibleWhen = waveVisible;
       add(std::move(waveThickness));
+
       auto ringOpacity = doubleSpec("ring_opacity", 0.8, 0.0, 1.0, 0.1);
       ringOpacity.visibleWhen = ringsVisible;
       add(std::move(ringOpacity));
+
       add(doubleSpec("inner_diameter", 0.7, 0.0, 1.0, 0.05));
       add(doubleSpec("bloom_intensity", 0.5, 0.0, 1.0, 0.05));
       add(boolSpec("fade_when_idle", true));
+      add(boolSpec("blur", false));
+      add(doubleSpec("opacity", 100, 0.0, 100, 1.0));
       add(colorSpec("primary_color", "primary"));
       add(colorSpec("secondary_color", "secondary"));
     } else if (type == "sticker") {
@@ -486,12 +493,13 @@ namespace desktop_settings {
       DesktopWidgetSettingsScope scope
   ) {
     const std::vector<WidgetSettingSpec> specs = scope == DesktopWidgetSettingsScope::Widget
-        ? desktopWidgetSettingSpecs(type)
-        : commonDesktopWidgetSettingSpecs(type);
-    for (const auto& spec : specs) {
-      settings.insert_or_assign(spec.schema.key, spec.schema.defaultValue);
-    }
-  }
+    ? desktopWidgetSettingSpecs(type)
+    : commonDesktopWidgetSettingSpecs(type);
+
+        for (const auto& spec : specs) {
+          settings.insert_or_assign(spec.schema.key, spec.schema.defaultValue);
+        }
+       }    
 
   void applyAllDesktopWidgetDefaultSettings(
       std::unordered_map<std::string, WidgetSettingValue>& settings, std::string_view type

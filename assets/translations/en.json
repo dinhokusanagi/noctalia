@@ -530,6 +530,7 @@
         "label-min-width": "Label Min Width",
         "layout": "Layout",
         "mirrored": "Mirrored",
+        "blur": "Blur",
         "network-speed-compact": "Compact Network Speed",
         "network-speed-unit": "Network Speed Unit",
         "network-speed-unit-auto": "Auto",

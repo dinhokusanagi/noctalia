@@ -1,4 +1,3 @@
-#include "util/string_utils.h"
 #include "shell/control_center/tabs/home_tab.h"
 
 #include "config/config_service.h"
@@ -28,6 +27,7 @@
 #include "ui/builders.h"
 #include "ui/controls/grid_view.h"
 #include "ui/dialogs/file_dialog.h"
+#include "util/string_utils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -1505,17 +1505,16 @@ void HomeTab::sync(Renderer& renderer) {
         m_mediaProgress->setVisible(false);
         m_mediaStatus->setColor(colorSpecFromRole(ColorRole::OnSurfaceVariant));
         if (m_mediaArt != nullptr) {
-        m_mediaArt->clear(renderer);
-        m_mediaArt->setVisible(false);
-      }
+          m_mediaArt->clear(renderer);
+          m_mediaArt->setVisible(false);
+        }
         m_loadedMediaArtUrl.clear();
         PanelManager::instance().requestLayout();
-              } else {
+      } else {
         const std::string artists = mpris::joinArtists(active->artists);
         const std::string trackText =
             active->title.empty() ? i18n::tr("control-center.home.media.unknown-track") : active->title;
-        const std::string artistText =
-            artists.empty() ? i18n::tr("control-center.home.media.unknown-artist") : artists;
+        const std::string artistText = artists.empty() ? i18n::tr("control-center.home.media.unknown-artist") : artists;
 
         if (m_mediaTrack->text() != trackText || m_mediaArtist->text() != artistText) {
           m_mediaTrack->setText(trackText);
@@ -1599,30 +1598,30 @@ void HomeTab::sync(Renderer& renderer) {
         }
         std::string statusText;
         if (active->playbackStatus == "Playing") {
-        statusText = i18n::tr("control-center.home.media.playing");
-        m_mediaStatus->setColor(colorSpecFromRole(ColorRole::Primary));
-      } else if (active->playbackStatus == "Paused") {
-        statusText = i18n::tr("control-center.home.media.paused");
-        m_mediaStatus->setColor(colorSpecFromRole(ColorRole::OnSurfaceVariant));
-      } else {
-        statusText = active->playbackStatus;
-        m_mediaStatus->setColor(colorSpecFromRole(ColorRole::OnSurfaceVariant));
-      } 
+          statusText = i18n::tr("control-center.home.media.playing");
+          m_mediaStatus->setColor(colorSpecFromRole(ColorRole::Primary));
+        } else if (active->playbackStatus == "Paused") {
+          statusText = i18n::tr("control-center.home.media.paused");
+          m_mediaStatus->setColor(colorSpecFromRole(ColorRole::OnSurfaceVariant));
+        } else {
+          statusText = active->playbackStatus;
+          m_mediaStatus->setColor(colorSpecFromRole(ColorRole::OnSurfaceVariant));
+        }
 
-      if (!progressText.empty()) {
-       statusText = std::format("{} · {}", statusText, progressText);
-      } 
+        if (!progressText.empty()) {
+          statusText = std::format("{} · {}", statusText, progressText);
+        }
 
-      if (m_mediaStatus->text() != statusText) {
-       m_mediaStatus->setText(statusText);
-       PanelManager::instance().requestLayout();
+        if (m_mediaStatus->text() != statusText) {
+          m_mediaStatus->setText(statusText);
+          PanelManager::instance().requestLayout();
+        }
+
+        m_mediaStatus->setVisible(!progressText.empty());
       }
-
-       m_mediaStatus->setVisible(!progressText.empty());
-           }
-         }
-       }
-      }     
+    }
+  }
+}
 
 void HomeTab::warnOnOversizedAvatarSource(const std::string& path) {
   if (path == m_sizeCheckedAvatarPath) {

@@ -60,6 +60,12 @@ void AudioVisualizer::tick(float deltaMs) {
   }
 }
 
+void AudioVisualizer::setBarWidth(float width) {
+  auto next = style();
+  next.barWidth = std::clamp(width, 0.1F, 5.0F);
+  setStyle(next);
+}
+
 void AudioVisualizer::setGradient(const ColorSpec& color1, const ColorSpec& color2) {
   m_color1 = color1;
   m_color2 = color2;

@@ -165,20 +165,29 @@ namespace {
   }
 
   void applyCommonSettings(
-      DesktopWidget& widget, const std::unordered_map<std::string, WidgetSettingValue>& settings,
-      bool defaultBackground = true
-  ) {
-    if (getBoolSetting(settings, "background", defaultBackground)) {
-      ColorSpec bgColor = getColorSpecSetting(settings, "background_color", colorSpecFromRole(ColorRole::Surface));
-      bgColor.alpha *= std::clamp(getFloatSetting(settings, "background_opacity", 0.8F), 0.0F, 1.0F);
-      const float radius = getFloatSetting(settings, "background_radius", kDefaultBgRadius);
-      const float padding = getFloatSetting(settings, "background_padding", kDefaultBgPadding);
-      widget.setBackgroundStyle(bgColor, radius, padding);
+    DesktopWidget& widget, const std::unordered_map<std::string, WidgetSettingValue>& settings,
+    bool defaultBackground = true
+) {
+  bool backgroundEnabled = getBoolSetting(settings, "background", defaultBackground);
+
+  if (const auto it = settings.find("background_mode"); it != settings.end()) {
+    if (const auto* mode = std::get_if<std::string>(&it->second)) {
+      backgroundEnabled = *mode != "none";
     }
-    // Stored on the widget and pushed onto its text nodes during layout(), so the chosen font
-    // survives widget rebuilds (constructor settings bake in; this does not).
-    widget.setFontFamily(getStringSetting(settings, "font_family", ""));
   }
+
+  if (backgroundEnabled) {
+    ColorSpec bgColor = getColorSpecSetting(settings, "background_color", colorSpecFromRole(ColorRole::Surface));
+    bgColor.alpha *= std::clamp(getFloatSetting(settings, "background_opacity", 0.8F), 0.0F, 1.0F);
+    const float radius = getFloatSetting(settings, "background_radius", kDefaultBgRadius);
+    const float padding = getFloatSetting(settings, "background_padding", kDefaultBgPadding);
+    widget.setBackgroundStyle(bgColor, radius, padding);
+  }
+
+  // Stored on the widget and pushed onto its text nodes during layout(),
+  // so the chosen font survives widget rebuilds (constructor settings bake in; this does not).
+  widget.setFontFamily(getStringSetting(settings, "font_family", ""));
+}
 
 } // namespace
 
@@ -186,7 +195,6 @@ DesktopWidgetFactory::DesktopWidgetFactory(DesktopWidgetRuntimeServices services
     : m_calendar(services.calendar), m_pipewire(services.pipewire), m_pipewireSpectrum(services.pipewireSpectrum),
       m_weather(services.weather), m_mpris(services.mpris), m_httpClient(services.httpClient),
       m_sysmon(services.sysmon), m_scriptDeps(services.scriptDeps) {}
-
 std::unique_ptr<DesktopWidget> DesktopWidgetFactory::create(
     const std::string& type, const std::unordered_map<std::string, WidgetSettingValue>& settings, float contentScale
 ) const {
@@ -229,14 +237,23 @@ std::unique_ptr<DesktopWidget> DesktopWidgetFactory::create(
     auto widget = std::make_unique<DesktopAudioVisualizerWidget>(
         m_pipewireSpectrum,
         DesktopAudioVisualizerWidget::Options{
-            .bands = getIntSetting(settings, "bands", 32),
-            .mirrored = getBoolSetting(settings, "mirrored", true),
-            .reversed = getBoolSetting(settings, "reversed", false),
-            .centered = getBoolSetting(settings, "centered", true),
-            .showWhenIdle = getBoolSetting(settings, "show_when_idle", true),
-            .color1 = getColorSpecSetting(settings, "color_1", colorSpecFromRole(ColorRole::Primary)),
-            .color2 = getColorSpecSetting(settings, "color_2", colorSpecFromRole(ColorRole::Primary)),
-        }
+       .bands = getIntSetting(settings, "bands", 32),
+       .blur = [&]() {
+         if (const auto it = settings.find("background_mode"); it != settings.end()) {
+           if (const auto* mode = std::get_if<std::string>(&it->second)) {
+             return *mode == "blur";
+           }
+         }
+         return getBoolSetting(settings, "blur", false);
+}       (),
+       .mirrored = getBoolSetting(settings, "mirrored", true),
+       .reversed = getBoolSetting(settings, "reversed", false),
+       .centered = getBoolSetting(settings, "centered", true),
+       .showWhenIdle = getBoolSetting(settings, "show_when_idle", true),
+       .opacity = getFloatSetting(settings, "opacity", 100.0F) / 100.0F,
+       .color1 = getColorSpecSetting(settings, "color_1", colorSpecFromRole(ColorRole::Primary)),
+       .color2 = getColorSpecSetting(settings, "color_2", colorSpecFromRole(ColorRole::Primary)),
+      }   
     );
     applyCommonSettings(*widget, settings);
     widget->setContentScale(contentScale);
@@ -253,21 +270,23 @@ std::unique_ptr<DesktopWidget> DesktopWidgetFactory::create(
       return nullptr;
     }
     auto widget = std::make_unique<DesktopFancyAudioVisualizerWidget>(
-        m_pipewireSpectrum,
-        DesktopFancyAudioVisualizerWidget::Options{
-            .mode = *mode,
-            .sensitivity = getFloatSetting(settings, "sensitivity", 1.5F),
-            .rotationSpeed = getFloatSetting(settings, "rotation_speed", 0.5F),
-            .barWidth = getFloatSetting(settings, "bar_width", 0.6F),
-            .ringOpacity = getFloatSetting(settings, "ring_opacity", 0.8F),
-            .bloomIntensity = getFloatSetting(settings, "bloom_intensity", 0.5F),
-            .waveThickness = getFloatSetting(settings, "wave_thickness", 1.0F),
-            .innerDiameter = getFloatSetting(settings, "inner_diameter", 0.7F),
-            .fadeWhenIdle = getBoolSetting(settings, "fade_when_idle", true),
-            .primaryColor = getColorSpecSetting(settings, "primary_color", colorSpecFromRole(ColorRole::Primary)),
-            .secondaryColor = getColorSpecSetting(settings, "secondary_color", colorSpecFromRole(ColorRole::Secondary)),
-        }
-    );
+    m_pipewireSpectrum,
+    DesktopFancyAudioVisualizerWidget::Options{
+        .mode = *mode,
+        .sensitivity = getFloatSetting(settings, "sensitivity", 1.5F),
+        .rotationSpeed = getFloatSetting(settings, "rotation_speed", 0.5F),
+        .barWidth = getFloatSetting(settings, "bar_width", 0.6F),
+        .ringOpacity = getFloatSetting(settings, "ring_opacity", 0.8F),
+        .bloomIntensity = getFloatSetting(settings, "bloom_intensity", 0.5F),
+        .waveThickness = getFloatSetting(settings, "wave_thickness", 1.0F),
+        .innerDiameter = getFloatSetting(settings, "inner_diameter", 0.7F),
+        .fadeWhenIdle = getBoolSetting(settings, "fade_when_idle", true),
+        .blur = getBoolSetting(settings, "blur", false),
+        .opacity = getFloatSetting(settings, "opacity", 100.0F) / 100.0F,
+        .primaryColor = getColorSpecSetting(settings, "primary_color", colorSpecFromRole(ColorRole::Primary)),
+        .secondaryColor = getColorSpecSetting(settings, "secondary_color", colorSpecFromRole(ColorRole::Secondary)),
+    }
+  );
     applyCommonSettings(*widget, settings, false);
     widget->setContentScale(contentScale);
     return widget;

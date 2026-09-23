@@ -82,6 +82,7 @@ public:
 
   [[nodiscard]] bool hasBackground() const noexcept { return m_bgEnabled; }
   [[nodiscard]] bool hasVisibleBackground() const noexcept;
+  void setBlurEnabled(bool enabled) noexcept;
   [[nodiscard]] float backgroundRadius() const noexcept {
     return m_bgEnabled ? std::round(m_bgRadius * m_baseScale) : 0.0F;
   }
@@ -170,6 +171,7 @@ protected:
   FrameTickRequestCallback m_frameTickRequestCallback;
 
   bool m_bgEnabled = false;
+  bool m_blurEnabled = false;
   ColorSpec m_bgColor;
   float m_bgRadius = 0.0F;
   float m_bgPadding = 0.0F;

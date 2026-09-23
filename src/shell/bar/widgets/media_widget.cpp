@@ -78,7 +78,7 @@ void MediaWidget::create() {
           .maxWidth = m_maxWidth * m_contentScale,
           .maxLines = 1,
           .autoScroll = false,
-      .autoScrollSpeed = 17.0F,
+          .autoScrollSpeed = 17.0F,
       })
   );
 
@@ -130,7 +130,6 @@ void MediaWidget::create() {
 
   setRoot(std::move(area));
 }
-
 
 void MediaWidget::doLayout(Renderer& renderer, float containerWidth, float containerHeight) {
   auto* rootNode = root();
@@ -232,21 +231,15 @@ void MediaWidget::doLayout(Renderer& renderer, float containerWidth, float conta
   // Media controls follow the artwork and stay aligned on the bar.
   const float controlsGap = Style::spaceXs * m_contentScale;
   const float buttonSize = Style::baseGlyphSize * 1.8F * m_contentScale;
-  const float contentEnd = showLabel
-      ? m_label->x() + m_label->width()
-      : (showArtSlot ? artSize : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
+  const float contentEnd = showLabel ? m_label->x() + m_label->width()
+                                     : (showArtSlot ? artSize : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
 
-  const float controlsX = contentEnd > 0.0F
-      ? contentEnd + controlsGap
-      : 0.0F;
+  const float controlsX = contentEnd > 0.0F ? contentEnd + controlsGap : 0.0F;
   const float controlsY = std::round((contentHeight - buttonSize) * 0.5F);
 
   if (!artOnly) {
     const float requiredWidth = controlsX + buttonSize * 3.0F;
-    rootNode->setSize(
-        std::max(rootNode->width(), requiredWidth),
-        rootNode->height()
-    );
+    rootNode->setSize(std::max(rootNode->width(), requiredWidth), rootNode->height());
   }
 
   m_previousButton->setSize(buttonSize, buttonSize);
@@ -371,9 +364,7 @@ void MediaWidget::syncState(Renderer& renderer, const std::optional<MprisPlayerI
 
   if (playbackChanged && !textChanged && !artChanged && !artAwaitingDecode) {
     m_lastPlaybackStatus = playbackStatus;
-  m_playPauseButton->setGlyph(
-      m_lastPlaybackStatus == "Playing" ? "media-pause" : "media-play"
-  );
+    m_playPauseButton->setGlyph(m_lastPlaybackStatus == "Playing" ? "media-pause" : "media-play");
     m_label->setColor(
         m_lastPlaybackStatus == "Playing" ? widgetForegroundOr(colorSpecFromRole(ColorRole::OnSurface))
                                           : colorSpecFromRole(ColorRole::OnSurfaceVariant)
@@ -385,9 +376,7 @@ void MediaWidget::syncState(Renderer& renderer, const std::optional<MprisPlayerI
   m_lastText = displayText;
   m_lastArtUrl = artUrl;
   m_lastPlaybackStatus = playbackStatus;
-  m_playPauseButton->setGlyph(
-      m_lastPlaybackStatus == "Playing" ? "media-pause" : "media-play"
-  );
+  m_playPauseButton->setGlyph(m_lastPlaybackStatus == "Playing" ? "media-pause" : "media-play");
 
   if (textChanged) {
     m_label->setText(m_lastText);

@@ -24,7 +24,10 @@ namespace {
 DesktopAudioVisualizerWidget::DesktopAudioVisualizerWidget(PipeWireSpectrum* spectrum, Options options)
     : m_spectrum(spectrum), m_bands(std::max(1, options.bands)), m_mirrored(options.mirrored),
       m_reversed(options.reversed), m_centered(options.centered), m_showWhenIdle(options.showWhenIdle),
-      m_color1(options.color1), m_color2(options.color2) {}
+      m_blur(options.blur), m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)),
+      m_color1(options.color1), m_color2(options.color2) {
+  setBlurEnabled(m_blur);
+}
 
 DesktopAudioVisualizerWidget::~DesktopAudioVisualizerWidget() {
   cancelVisibilityAnimation();
@@ -35,6 +38,7 @@ DesktopAudioVisualizerWidget::~DesktopAudioVisualizerWidget() {
 
 void DesktopAudioVisualizerWidget::create() {
   auto rootNode = ui::node({});
+  rootNode->setOpacity(m_opacity);
   rootNode->setClipChildren(true);
 
   auto visualizer = std::make_unique<AudioVisualizer>();
@@ -99,15 +103,41 @@ bool DesktopAudioVisualizerWidget::applySetting(
     }
     return false;
   }
-  if (key == "show_when_idle") {
-    if (const auto* v = std::get_if<bool>(&value)) {
-      m_showWhenIdle = *v;
+    if (key == "blur") {
+  if (const auto* v = std::get_if<bool>(&value)) {
+    m_blur = *v;
+    setBlurEnabled(m_blur);
+    return true;
+  }
+  return false;
+}
+
+  if (key == "background") {
+  if (const auto* v = std::get_if<bool>(&value)) {
+    if (*v) {
+      setBackgroundStyle(colorSpecFromRole(ColorRole::Surface), 12.0F, 10.0F);
+    } else {
+      setBackgroundStyle(ColorSpec{}, 0.0F, 0.0F);
+    }
+    return true;
+  }
+  return false;
+}
+
+  if (key == "opacity") {
+    if (const auto* v = std::get_if<double>(&value)) {
+      m_opacity = std::clamp(static_cast<float>(*v) / 100.0F, 0.0F, 1.0F);
+      if (root() != nullptr && m_visible && !m_fadingOut) {
+        root()->setOpacity(m_opacity);
+      }
       return true;
     }
     return false;
   }
-  return DesktopWidget::applySetting(key, value, allSettings, renderer);
+
+  return false;
 }
+
 
 void DesktopAudioVisualizerWidget::setEditorPreview(bool enabled) noexcept {
   if (m_editorPreview == enabled) {
@@ -238,7 +268,7 @@ bool DesktopAudioVisualizerWidget::applyVisibility() {
     m_fadingOut = false;
     m_visible = nextVisible;
     setVisibilityCollapsed(!m_visible);
-    root()->setOpacity(m_visible ? 1.0F : 0.0F);
+    root()->setOpacity(m_visible ? m_opacity : 0.0F);
     return !m_visible;
   }
 
@@ -260,7 +290,7 @@ bool DesktopAudioVisualizerWidget::applyVisibility() {
   m_fadingOut = false;
   m_visible = true;
   setVisibilityCollapsed(false);
-  startOpacityAnimation(1.0F, false);
+  startOpacityAnimation(m_opacity, false);
   return wasCollapsed;
 }
 

@@ -2553,22 +2553,8 @@ void Bar::populateWidgets(BarInstance& instance) {
   createWidgets(instance.barConfig.centerWidgets, instance.centerWidgets);
   createWidgets(instance.barConfig.endWidgets, instance.endWidgets);
 
-#ifndef NDEBUG
-  // Prepend a red "debug" pill to the end section if running a debug build
-  auto debugWidget = m_widgetFactory->create(
-      "debug_indicator", instance.output, instance.barConfig.scale, instance.barConfig.position,
-      instance.barConfig.name, static_cast<float>(instance.barConfig.widgetSpacing)
-  );
-  if (debugWidget != nullptr) {
-    debugWidget->setConfigName("debug_indicator");
-    debugWidget->setFontScale(instance.barConfig.fontScale);
-    debugWidget->setLabelFontWeight(labelFontWeight);
-    debugWidget->setLabelFontFamily(barFontFamily);
-    debugWidget->create();
-    instance.endWidgets.insert(instance.endWidgets.begin(), std::move(debugWidget));
-  }
-#endif
 }
+
 
 void Bar::attachWidgetsToSections(BarInstance& instance) {
   const bool isVertical = instance.barConfig.position == "left" || instance.barConfig.position == "right";

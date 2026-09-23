@@ -196,13 +196,14 @@ namespace {
   }
 
   std::unique_ptr<Flex> makeSliderControl(
-      double value, double minVal, double maxVal, double step, bool integerValue, DesktopWidgetsEditor* editor,
-      const std::string& key
-  ) {
+    double value, double minVal, double maxVal, double step, bool integerValue, DesktopWidgetsEditor* editor,
+    const std::string& key
+) {
+    const bool integerDisplay = integerValue || std::abs(step - 1.0) < 1e-9;
     Input* valueInputPtr = nullptr;
     auto valueInput = ui::input({
         .out = &valueInputPtr,
-        .value = settings::formatSliderValue(value, integerValue),
+        .value = settings::formatSliderValue(value, integerDisplay),
         .fontSize = Style::fontSizeCaption,
         .controlHeight = Style::controlHeightSm,
         .horizontalPadding = Style::spaceXs,
@@ -222,9 +223,9 @@ namespace {
         .thumbSize = Style::sliderThumbSize,
         .controlHeight = Style::controlHeightSm,
         .flexGrow = 1.0F,
-        .onValueChanged = [valueInputPtr, integerValue, editor, key](double val) {
+        .onValueChanged = [valueInputPtr, integerValue, integerDisplay, editor, key](double val) {
           valueInputPtr->setInvalid(false);
-          valueInputPtr->setValue(settings::formatSliderValue(val, integerValue));
+          valueInputPtr->setValue(settings::formatSliderValue(val, integerDisplay));
           if (integerValue) {
             editor->applySettingChange(key, static_cast<std::int64_t>(std::llround(val)));
           } else {
@@ -954,6 +955,7 @@ void DesktopWidgetsEditor::applySettingChange(const std::string& key, WidgetSett
     m_renderContext->makeCurrent(surface->surface->renderTarget());
     Renderer& renderer = surface->surface->renderTarget().renderer();
 
+
     if (view.widget != nullptr && view.widget->applySetting(key, value, state->settings, renderer)) {
       applyViewState(view, *state, true);
       updateSelectionVisuals(*surface);
@@ -1058,6 +1060,7 @@ void DesktopWidgetsEditor::resetSelectedWidgetSettings() {
 void DesktopWidgetsEditor::buildInspector(
     OverlaySurface& surface, Node& root, const DesktopWidgetState& selectedState
 ) {
+  fprintf(stderr, "========== BUILD INSPECTOR ==========\n");
   Renderer& renderer = surface.surface->renderTarget().renderer();
   auto handleArea = ui::inputArea({});
   handleArea->setParticipatesInLayout(false);
@@ -1091,6 +1094,7 @@ void DesktopWidgetsEditor::buildInspector(
   content->setPadding(Style::spaceSm, Style::spaceMd);
 
   const auto typeSpecs = desktop_settings::desktopWidgetSettingSpecs(selectedState.type);
+  fprintf(stderr, "INSPECTOR TYPE='%s' SPECS=%zu\n", selectedState.type.c_str(), typeSpecs.size());
   const auto backgroundSpecs = desktop_settings::commonDesktopWidgetSettingSpecs(selectedState.type);
   addSettingsSection(
       *content, typeSpecs, selectedState.settings, this, "desktop-widgets.editor.settings.widget-section", false

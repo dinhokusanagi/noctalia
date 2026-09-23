@@ -291,7 +291,7 @@ void ContextMenuControl::rebuildRows(Renderer& renderer) {
 
     auto row = std::make_unique<InputArea>();
     row->setFrameSize(rowWidth, rowHeight);
-    row->setPosition(menuPadding, currentY);
+    row->setPosition(menuPadding, currentY + itemHeight);
     row->setEnabled(interactive);
 
     Box* rowBgPtr = nullptr;

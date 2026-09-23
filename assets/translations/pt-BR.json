@@ -530,6 +530,7 @@
         "label-min-width": "Largura Mínima do Rótulo",
         "layout": "Layout",
         "mirrored": "Espelhado",
+        "blur": "Blur",
         "network-speed-compact": "Velocidade de Rede Compacta",
         "network-speed-unit": "Unidade de Velocidade da Internet",
         "network-speed-unit-auto": "Automático",

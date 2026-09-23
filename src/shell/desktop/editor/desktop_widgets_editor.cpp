@@ -1080,15 +1080,34 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
                                 });
 
   const auto typeOptions = desktop_settings::desktopWidgetTypeOptions();
-  std::vector<std::string> typeLabels;
-  typeLabels.reserve(typeOptions.size());
-  std::size_t selectedTypeIndex = 0;
-  for (std::size_t i = 0; i < typeOptions.size(); ++i) {
+
+fprintf(
+    stderr,
+    "TYPE OPTIONS: count=%zu current='%s'\n",
+    typeOptions.size(),
+    m_addWidgetType.c_str()
+);
+
+for (std::size_t i = 0; i < typeOptions.size(); ++i) {
+    fprintf(
+        stderr,
+        "TYPE OPTION[%zu]: value='%s' label='%s'\n",
+        i,
+        typeOptions[i].value.c_str(),
+        typeOptions[i].label.c_str()
+    );
+}
+
+std::vector<std::string> typeLabels;
+typeLabels.reserve(typeOptions.size());
+std::size_t selectedTypeIndex = 0;
+
+for (std::size_t i = 0; i < typeOptions.size(); ++i) {
     typeLabels.push_back(typeOptions[i].label);
     if (typeOptions[i].value == m_addWidgetType) {
-      selectedTypeIndex = i;
+        selectedTypeIndex = i;
     }
-  }
+}
 
   const std::array<std::int32_t, 5> gridSizes{8, 16, 24, 32, 64};
   std::size_t selectedGridIndex = 1;
@@ -1145,11 +1164,34 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
                       .selectedIndex = selectedTypeIndex,
                       .controlHeight = Style::controlHeightSm,
                       .onSelectionChanged =
-                          [this](std::size_t index, std::string_view) {
-                            const auto options = desktop_settings::desktopWidgetTypeOptions();
-                            if (index < options.size()) {
-                              m_addWidgetType = options[index].value;
-                            }
+                          [this](std::size_t index, std::string_view selectedLabel) {
+                              const auto options = desktop_settings::desktopWidgetTypeOptions();
+
+                              fprintf(
+                                  stderr,
+                                  "SELECT CALLBACK: index=%zu label='%s' options=%zu\n",
+                                  index,
+                                  std::string(selectedLabel).c_str(),
+                                  options.size()
+                              );
+
+                              if (index < options.size()) {
+                                  fprintf(
+                                      stderr,
+                                      "SELECT CALLBACK OPTION[%zu]: value='%s' label='%s'\n",
+                                      index,
+                                      options[index].value.c_str(),
+                                      options[index].label.c_str()
+                                  );
+
+                                  m_addWidgetType = options[index].value;
+
+                                  fprintf(
+                                      stderr,
+                                      "ADD WIDGET TYPE: '%s'\n",
+                                      m_addWidgetType.c_str()
+                                  );
+                              }
                           },
                       .configure = [](Select& select) { select.setMinWidth(200.0F); },
                   }),
@@ -1159,7 +1201,19 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
                       .tooltip = i18n::tr("desktop-widgets.editor.actions.add"),
                       .onClick =
                           [this, outputName = surface.outputName]() {
-                            deferEditorMutation([this, outputName]() { addWidget(outputName, m_addWidgetType); });
+                              fprintf(
+                                  stderr,
+                                  "ADD BUTTON: m_addWidgetType='%s'\n",
+                                  m_addWidgetType.c_str()
+                              );
+                              deferEditorMutation([this, outputName]() {
+                                  fprintf(
+                                      stderr,
+                                      "ADD WIDGET: type='%s'\n",
+                                      m_addWidgetType.c_str()
+                                  );
+                                  addWidget(outputName, m_addWidgetType);
+                              });
                           },
                   }),
                   ui::button({
@@ -1210,6 +1264,13 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
                               [this]() {
                                 deferEditorMutation([this]() {
                                   m_inspectorOpen = !m_inspectorOpen;
+
+                                  fprintf(
+                                      stderr,
+                                      "SETTINGS BUTTON: m_inspectorOpen=%d\n",
+                                      m_inspectorOpen
+                                  );
+
                                   requestLayout();
                                 });
                               },
@@ -1296,6 +1357,8 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
                   })
               );
 
+  fprintf(stderr, "REBUILD SCENE\n");
+
   surface.toolbar = toolbarPtr;
   root->addChild(std::move(toolbar));
   toolbarPtr->layout(renderer);
@@ -1309,6 +1372,7 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
   }
   clampToolbarPosition(surface, toolbarPtr->width(), toolbarPtr->height());
   toolbarPtr->setPosition(surface.toolbarX, surface.toolbarY);
+
 
   if (hasSelectedWidget && m_inspectorOpen) {
     buildInspector(surface, *root, *selectedWidgetIt);

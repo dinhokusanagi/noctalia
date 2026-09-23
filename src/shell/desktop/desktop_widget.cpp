@@ -103,7 +103,7 @@ Node* DesktopWidget::presentationRoot() const noexcept {
 }
 
 bool DesktopWidget::hasVisibleBackground() const noexcept {
-  if (!m_bgEnabled) {
+  if (!m_bgEnabled || !m_blurEnabled) {
     return false;
   }
   const Node* node = presentationRoot();
@@ -164,6 +164,10 @@ void DesktopWidget::setBackgroundStyle(const ColorSpec& color, float radius, flo
   m_bgColor = color;
   m_bgRadius = radius;
   m_bgPadding = padding;
+}
+
+void DesktopWidget::setBlurEnabled(bool enabled) noexcept {
+  m_blurEnabled = enabled;
 }
 
 bool DesktopWidget::applySetting(
