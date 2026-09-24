@@ -29,11 +29,8 @@ MediaWidget::MediaWidget(MprisService* mpris, HttpClient* httpClient, wl_output*
     : m_mpris(mpris), m_httpClient(httpClient), m_maxWidth(static_cast<float>(options.maxWidth)),
       m_minWidth(static_cast<float>(options.minWidth)), m_artSize(static_cast<float>(options.artSize)),
       m_titleScrollMode(options.titleScrollMode), m_hideWhenNoMedia(options.hideWhenNoMedia),
-      m_hideAlbumArt(options.hideAlbumArt),
-      m_hideTitle(options.hideTitle),
-      m_hideArtist(options.hideArtist),
-      m_hideControls(options.hideControls),
-      m_showProgress(options.showProgress) {}
+      m_hideAlbumArt(options.hideAlbumArt), m_hideTitle(options.hideTitle), m_hideArtist(options.hideArtist),
+      m_hideControls(options.hideControls), m_showProgress(options.showProgress) {}
 
 void MediaWidget::create() {
   auto area = ui::inputArea({});
@@ -229,12 +226,10 @@ void MediaWidget::doLayout(Renderer& renderer, float containerWidth, float conta
     }
     const float contentWidth = showLabel ? m_label->x() + m_label->width()
                                          : (showArtSlot ? artSize : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
-    const float finalWidth =
-        contentWidth > 0.0F
-            ? (showArtSlot && !showLabel
-                   ? std::clamp(contentWidth, 0.0F, maxLength)
-                   : std::clamp(contentWidth, minLength, maxLength))
-            : 0.0F;
+    const float finalWidth = contentWidth > 0.0F
+        ? (showArtSlot && !showLabel ? std::clamp(contentWidth, 0.0F, maxLength)
+                                     : std::clamp(contentWidth, minLength, maxLength))
+        : 0.0F;
 
     rootNode->setSize(finalWidth, contentHeight);
   }
@@ -252,22 +247,16 @@ void MediaWidget::doLayout(Renderer& renderer, float containerWidth, float conta
     const float controlsGap = Style::spaceXs * m_contentScale;
     const float buttonSize = Style::baseGlyphSize * 1.8F * m_contentScale;
 
-    const float contentEnd =
-        showLabel ? m_label->x() + m_label->width()
-                  : (showArtSlot ? artSize
-                                 : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
+    const float contentEnd = showLabel ? m_label->x() + m_label->width()
+                                       : (showArtSlot ? artSize : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
 
-    const float controlsX =
-        contentEnd > 0.0F ? contentEnd + controlsGap : 0.0F;
+    const float controlsX = contentEnd > 0.0F ? contentEnd + controlsGap : 0.0F;
 
-    const float controlsY =
-        std::round((contentHeight - buttonSize) * 0.5F);
+    const float controlsY = std::round((contentHeight - buttonSize) * 0.5F);
 
     const float requiredWidth = controlsX + buttonSize * 3.0F;
 
-    rootNode->setSize(
-        std::max(contentOnlyWidth, requiredWidth),
-        rootNode->height());
+    rootNode->setSize(std::max(contentOnlyWidth, requiredWidth), rootNode->height());
 
     m_previousButton->setSize(buttonSize, buttonSize);
     m_previousButton->setPosition(controlsX, controlsY);
@@ -452,8 +441,7 @@ void MediaWidget::syncState(Renderer& renderer, const std::optional<MprisPlayerI
   }
 }
 
-std::string MediaWidget::buildDisplayText(
-    const MprisPlayerInfo& player, bool hideTitle, bool hideArtist) {
+std::string MediaWidget::buildDisplayText(const MprisPlayerInfo& player, bool hideTitle, bool hideArtist) {
   const std::string title = hideTitle ? std::string() : player.title;
   const std::string artists = hideArtist ? std::string() : joinArtists(player.artists);
 

@@ -280,31 +280,29 @@ std::unique_ptr<Flex> MediaTab::create() {
   );
 
   auto progressTimes = ui::row({
-    .align = FlexAlign::Center,
-    .justify = FlexJustify::SpaceBetween,
-});
+      .align = FlexAlign::Center,
+      .justify = FlexJustify::SpaceBetween,
+  });
 
-progressTimes->addChild(
-    ui::label({
-        .out = &m_progressCurrentTime,
-        .text = "00:00",
-        .fontSize = Style::fontSizeCaption * scale,
-        .color = colorSpecFromRole(ColorRole::Secondary),
-    })
-);
+  progressTimes->addChild(
+      ui::label({
+          .out = &m_progressCurrentTime,
+          .text = "00:00",
+          .fontSize = Style::fontSizeCaption * scale,
+          .color = colorSpecFromRole(ColorRole::Secondary),
+      })
+  );
 
-progressTimes->addChild(
-    ui::label({
-        .out = &m_progressTotalTime,
-        .text = "00:00",
-        .fontSize = Style::fontSizeCaption * scale,
-        .color = colorSpecFromRole(ColorRole::Secondary),
-    })
-);
+  progressTimes->addChild(
+      ui::label({
+          .out = &m_progressTotalTime,
+          .text = "00:00",
+          .fontSize = Style::fontSizeCaption * scale,
+          .color = colorSpecFromRole(ColorRole::Secondary),
+      })
+  );
 
-mediaStack->addChild(std::move(progressTimes));
-
-  
+  mediaStack->addChild(std::move(progressTimes));
 
   mediaStack->addChild(
       ui::slider({

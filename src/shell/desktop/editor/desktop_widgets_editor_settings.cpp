@@ -196,9 +196,9 @@ namespace {
   }
 
   std::unique_ptr<Flex> makeSliderControl(
-    double value, double minVal, double maxVal, double step, bool integerValue, DesktopWidgetsEditor* editor,
-    const std::string& key
-) {
+      double value, double minVal, double maxVal, double step, bool integerValue, DesktopWidgetsEditor* editor,
+      const std::string& key
+  ) {
     const bool integerDisplay = integerValue || std::abs(step - 1.0) < 1e-9;
     Input* valueInputPtr = nullptr;
     auto valueInput = ui::input({
@@ -954,7 +954,6 @@ void DesktopWidgetsEditor::applySettingChange(const std::string& key, WidgetSett
     }
     m_renderContext->makeCurrent(surface->surface->renderTarget());
     Renderer& renderer = surface->surface->renderTarget().renderer();
-
 
     if (view.widget != nullptr && view.widget->applySetting(key, value, state->settings, renderer)) {
       applyViewState(view, *state, true);

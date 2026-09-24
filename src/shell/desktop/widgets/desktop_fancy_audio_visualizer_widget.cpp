@@ -36,8 +36,8 @@ DesktopFancyAudioVisualizerWidget::DesktopFancyAudioVisualizerWidget(PipeWireSpe
       m_rotationSpeed(options.rotationSpeed), m_barWidth(options.barWidth), m_ringOpacity(options.ringOpacity),
       m_bloomIntensity(options.bloomIntensity), m_waveThickness(options.waveThickness),
       m_innerDiameter(options.innerDiameter), m_fadeWhenIdle(options.fadeWhenIdle),
-      m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)),
-      m_primaryColor(options.primaryColor), m_secondaryColor(options.secondaryColor) {
+      m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)), m_primaryColor(options.primaryColor),
+      m_secondaryColor(options.secondaryColor) {
   setBlurEnabled(true);
 }
 
@@ -47,7 +47,6 @@ DesktopFancyAudioVisualizerWidget::~DesktopFancyAudioVisualizerWidget() {
     m_spectrum->removeChangeListener(m_listenerId);
   }
 }
-
 
 void DesktopFancyAudioVisualizerWidget::create() {
   auto rootNode = ui::node({});

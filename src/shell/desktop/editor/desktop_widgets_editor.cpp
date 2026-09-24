@@ -1081,33 +1081,25 @@ void DesktopWidgetsEditor::rebuildScene(OverlaySurface& surface) {
 
   const auto typeOptions = desktop_settings::desktopWidgetTypeOptions();
 
-fprintf(
-    stderr,
-    "TYPE OPTIONS: count=%zu current='%s'\n",
-    typeOptions.size(),
-    m_addWidgetType.c_str()
-);
+  fprintf(stderr, "TYPE OPTIONS: count=%zu current='%s'\n", typeOptions.size(), m_addWidgetType.c_str());
 
-for (std::size_t i = 0; i < typeOptions.size(); ++i) {
+  for (std::size_t i = 0; i < typeOptions.size(); ++i) {
     fprintf(
-        stderr,
-        "TYPE OPTION[%zu]: value='%s' label='%s'\n",
-        i,
-        typeOptions[i].value.c_str(),
+        stderr, "TYPE OPTION[%zu]: value='%s' label='%s'\n", i, typeOptions[i].value.c_str(),
         typeOptions[i].label.c_str()
     );
-}
+  }
 
-std::vector<std::string> typeLabels;
-typeLabels.reserve(typeOptions.size());
-std::size_t selectedTypeIndex = 0;
+  std::vector<std::string> typeLabels;
+  typeLabels.reserve(typeOptions.size());
+  std::size_t selectedTypeIndex = 0;
 
-for (std::size_t i = 0; i < typeOptions.size(); ++i) {
+  for (std::size_t i = 0; i < typeOptions.size(); ++i) {
     typeLabels.push_back(typeOptions[i].label);
     if (typeOptions[i].value == m_addWidgetType) {
-        selectedTypeIndex = i;
+      selectedTypeIndex = i;
     }
-}
+  }
 
   const std::array<std::int32_t, 5> gridSizes{8, 16, 24, 32, 64};
   std::size_t selectedGridIndex = 1;
@@ -1165,33 +1157,23 @@ for (std::size_t i = 0; i < typeOptions.size(); ++i) {
                       .controlHeight = Style::controlHeightSm,
                       .onSelectionChanged =
                           [this](std::size_t index, std::string_view selectedLabel) {
-                              const auto options = desktop_settings::desktopWidgetTypeOptions();
+                            const auto options = desktop_settings::desktopWidgetTypeOptions();
 
+                            fprintf(
+                                stderr, "SELECT CALLBACK: index=%zu label='%s' options=%zu\n", index,
+                                std::string(selectedLabel).c_str(), options.size()
+                            );
+
+                            if (index < options.size()) {
                               fprintf(
-                                  stderr,
-                                  "SELECT CALLBACK: index=%zu label='%s' options=%zu\n",
-                                  index,
-                                  std::string(selectedLabel).c_str(),
-                                  options.size()
+                                  stderr, "SELECT CALLBACK OPTION[%zu]: value='%s' label='%s'\n", index,
+                                  options[index].value.c_str(), options[index].label.c_str()
                               );
 
-                              if (index < options.size()) {
-                                  fprintf(
-                                      stderr,
-                                      "SELECT CALLBACK OPTION[%zu]: value='%s' label='%s'\n",
-                                      index,
-                                      options[index].value.c_str(),
-                                      options[index].label.c_str()
-                                  );
+                              m_addWidgetType = options[index].value;
 
-                                  m_addWidgetType = options[index].value;
-
-                                  fprintf(
-                                      stderr,
-                                      "ADD WIDGET TYPE: '%s'\n",
-                                      m_addWidgetType.c_str()
-                                  );
-                              }
+                              fprintf(stderr, "ADD WIDGET TYPE: '%s'\n", m_addWidgetType.c_str());
+                            }
                           },
                       .configure = [](Select& select) { select.setMinWidth(200.0F); },
                   }),
@@ -1201,19 +1183,11 @@ for (std::size_t i = 0; i < typeOptions.size(); ++i) {
                       .tooltip = i18n::tr("desktop-widgets.editor.actions.add"),
                       .onClick =
                           [this, outputName = surface.outputName]() {
-                              fprintf(
-                                  stderr,
-                                  "ADD BUTTON: m_addWidgetType='%s'\n",
-                                  m_addWidgetType.c_str()
-                              );
-                              deferEditorMutation([this, outputName]() {
-                                  fprintf(
-                                      stderr,
-                                      "ADD WIDGET: type='%s'\n",
-                                      m_addWidgetType.c_str()
-                                  );
-                                  addWidget(outputName, m_addWidgetType);
-                              });
+                            fprintf(stderr, "ADD BUTTON: m_addWidgetType='%s'\n", m_addWidgetType.c_str());
+                            deferEditorMutation([this, outputName]() {
+                              fprintf(stderr, "ADD WIDGET: type='%s'\n", m_addWidgetType.c_str());
+                              addWidget(outputName, m_addWidgetType);
+                            });
                           },
                   }),
                   ui::button({
@@ -1265,11 +1239,7 @@ for (std::size_t i = 0; i < typeOptions.size(); ++i) {
                                 deferEditorMutation([this]() {
                                   m_inspectorOpen = !m_inspectorOpen;
 
-                                  fprintf(
-                                      stderr,
-                                      "SETTINGS BUTTON: m_inspectorOpen=%d\n",
-                                      m_inspectorOpen
-                                  );
+                                  fprintf(stderr, "SETTINGS BUTTON: m_inspectorOpen=%d\n", m_inspectorOpen);
 
                                   requestLayout();
                                 });
@@ -1372,7 +1342,6 @@ for (std::size_t i = 0; i < typeOptions.size(); ++i) {
   }
   clampToolbarPosition(surface, toolbarPtr->width(), toolbarPtr->height());
   toolbarPtr->setPosition(surface.toolbarX, surface.toolbarY);
-
 
   if (hasSelectedWidget && m_inspectorOpen) {
     buildInspector(surface, *root, *selectedWidgetIt);

@@ -231,9 +231,7 @@ std::unique_ptr<Flex> CalendarTab::createHeaderActions() {
           .selected = false,
           .tooltip = "Hoje",
           .onClick = [this]() { focusToday(); },
-          .configure = [scale](Button& button) {
-            panel_button_style::configureHeaderIconButton(button, scale);
-          },
+          .configure = [scale](Button& button) { panel_button_style::configureHeaderIconButton(button, scale); },
       }),
       ui::button({
           .out = &m_toggleEventsCardButton,
@@ -241,9 +239,7 @@ std::unique_ptr<Flex> CalendarTab::createHeaderActions() {
           .selected = m_showEventsCard,
           .tooltip = i18n::tr("control-center.calendar.toggle-events-card"),
           .onClick = [this]() { toggleEventsCard(); },
-          .configure = [scale](Button& button) {
-            panel_button_style::configureHeaderIconButton(button, scale);
-          },
+          .configure = [scale](Button& button) { panel_button_style::configureHeaderIconButton(button, scale); },
       })
   );
 }

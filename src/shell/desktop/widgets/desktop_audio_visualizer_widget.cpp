@@ -24,8 +24,8 @@ namespace {
 DesktopAudioVisualizerWidget::DesktopAudioVisualizerWidget(PipeWireSpectrum* spectrum, Options options)
     : m_spectrum(spectrum), m_bands(std::max(1, options.bands)), m_mirrored(options.mirrored),
       m_reversed(options.reversed), m_centered(options.centered), m_showWhenIdle(options.showWhenIdle),
-      m_blur(options.blur), m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)),
-      m_color1(options.color1), m_color2(options.color2) {
+      m_blur(options.blur), m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)), m_color1(options.color1),
+      m_color2(options.color2) {
   setBlurEnabled(m_blur);
 }
 
@@ -103,26 +103,26 @@ bool DesktopAudioVisualizerWidget::applySetting(
     }
     return false;
   }
-    if (key == "blur") {
-  if (const auto* v = std::get_if<bool>(&value)) {
-    m_blur = *v;
-    setBlurEnabled(m_blur);
-    return true;
+  if (key == "blur") {
+    if (const auto* v = std::get_if<bool>(&value)) {
+      m_blur = *v;
+      setBlurEnabled(m_blur);
+      return true;
+    }
+    return false;
   }
-  return false;
-}
 
   if (key == "background") {
-  if (const auto* v = std::get_if<bool>(&value)) {
-    if (*v) {
-      setBackgroundStyle(colorSpecFromRole(ColorRole::Surface), 12.0F, 10.0F);
-    } else {
-      setBackgroundStyle(ColorSpec{}, 0.0F, 0.0F);
+    if (const auto* v = std::get_if<bool>(&value)) {
+      if (*v) {
+        setBackgroundStyle(colorSpecFromRole(ColorRole::Surface), 12.0F, 10.0F);
+      } else {
+        setBackgroundStyle(ColorSpec{}, 0.0F, 0.0F);
+      }
+      return true;
     }
-    return true;
+    return false;
   }
-  return false;
-}
 
   if (key == "opacity") {
     if (const auto* v = std::get_if<double>(&value)) {
@@ -137,7 +137,6 @@ bool DesktopAudioVisualizerWidget::applySetting(
 
   return false;
 }
-
 
 void DesktopAudioVisualizerWidget::setEditorPreview(bool enabled) noexcept {
   if (m_editorPreview == enabled) {

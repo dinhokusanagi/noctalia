@@ -2552,9 +2552,7 @@ void Bar::populateWidgets(BarInstance& instance) {
   createWidgets(instance.barConfig.startWidgets, instance.startWidgets);
   createWidgets(instance.barConfig.centerWidgets, instance.centerWidgets);
   createWidgets(instance.barConfig.endWidgets, instance.endWidgets);
-
 }
-
 
 void Bar::attachWidgetsToSections(BarInstance& instance) {
   const bool isVertical = instance.barConfig.position == "left" || instance.barConfig.position == "right";

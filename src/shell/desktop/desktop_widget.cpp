@@ -166,9 +166,7 @@ void DesktopWidget::setBackgroundStyle(const ColorSpec& color, float radius, flo
   m_bgPadding = padding;
 }
 
-void DesktopWidget::setBlurEnabled(bool enabled) noexcept {
-  m_blurEnabled = enabled;
-}
+void DesktopWidget::setBlurEnabled(bool enabled) noexcept { m_blurEnabled = enabled; }
 
 bool DesktopWidget::applySetting(
     const std::string& key, const WidgetSettingValue& value,
