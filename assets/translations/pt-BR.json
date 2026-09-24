@@ -4009,6 +4009,22 @@
           "description": "Ao agrupar por espaço de trabalho, omita as cápsulas que não possuem janelas em execução na lista da barra de tarefas",
           "label": "Ocultar Espaços de trabalho Vazios"
         },
+	        "media-hide-album-art": {
+          "description": "Ocultar a capa do álbum",
+          "label": "Ocultar capa"
+        },
+        "media-hide-artist": {
+          "description": "Ocultar o nome do artista",
+          "label": "Ocultar artista"
+        },
+        "media-hide-title": {
+          "description": "Ocultar o título da faixa",
+          "label": "Ocultar título"
+        },
+        "media-hide-controls": {
+          "description": "Ocultar os controles de mídia",
+          "label": "Ocultar controles"
+        },
         "hide-inactive": {
           "description": "Oculta ícones de privacidade inativos e oculta o widget quando nada estiver ativo",
           "label": "Ocultar Inativo"

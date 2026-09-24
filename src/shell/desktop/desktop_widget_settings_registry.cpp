@@ -315,7 +315,6 @@ const WidgetSettingVisibility backgroundOn{"background", {"true"}};
       add(doubleSpec("inner_diameter", 0.7, 0.0, 1.0, 0.05));
       add(doubleSpec("bloom_intensity", 0.5, 0.0, 1.0, 0.05));
       add(boolSpec("fade_when_idle", true));
-      add(boolSpec("blur", false));
       add(doubleSpec("opacity", 100, 0.0, 100, 1.0));
       add(colorSpec("primary_color", "primary"));
       add(colorSpec("secondary_color", "secondary"));

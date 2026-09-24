@@ -220,18 +220,30 @@ std::unique_ptr<Flex> CalendarTab::createHeaderActions() {
   if (m_config != nullptr) {
     m_showEventsCard = m_config->config().controlCenter.calendarTab.showEventsCard;
   }
+
   return ui::row(
       {
           .align = FlexAlign::Center,
           .gap = Style::spaceSm * scale,
       },
       ui::button({
+          .glyph = "current-location",
+          .selected = false,
+          .tooltip = "Hoje",
+          .onClick = [this]() { focusToday(); },
+          .configure = [scale](Button& button) {
+            panel_button_style::configureHeaderIconButton(button, scale);
+          },
+      }),
+      ui::button({
           .out = &m_toggleEventsCardButton,
           .glyph = m_showEventsCard ? "calendar-event" : "calendar-off",
           .selected = m_showEventsCard,
           .tooltip = i18n::tr("control-center.calendar.toggle-events-card"),
           .onClick = [this]() { toggleEventsCard(); },
-          .configure = [scale](Button& button) { panel_button_style::configureHeaderIconButton(button, scale); },
+          .configure = [scale](Button& button) {
+            panel_button_style::configureHeaderIconButton(button, scale);
+          },
       })
   );
 }
@@ -330,6 +342,7 @@ void CalendarTab::focusToday() {
   m_lastDisplayYear = std::numeric_limits<int>::min();
   m_lastDisplayMonth = -1;
   m_eventsDirty = true;
+  PanelManager::instance().refresh();
 }
 
 void CalendarTab::onClose() {

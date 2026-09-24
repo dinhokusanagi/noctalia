@@ -28,19 +28,20 @@ enum class MediaTitleScrollMode : std::uint8_t {
 };
 
 class MediaWidget : public Widget {
-public:
+  public:
   struct Options {
-    int maxWidth = 220;
-    int minWidth = 80;
-    int artSize = 16;
-    MediaTitleScrollMode titleScrollMode = MediaTitleScrollMode::None;
-    bool hideWhenNoMedia = false;
-    bool albumArtOnly = false;
-    bool hideAlbumArt = false;
-    bool hideArtist = false;
-    bool artistFirst = false;
-    bool showProgress = false;
-  };
+  int maxWidth = 220;
+  int minWidth = 80;
+  int artSize = 16;
+  MediaTitleScrollMode titleScrollMode = MediaTitleScrollMode::None;
+  bool hideWhenNoMedia = false;
+  bool albumArtOnly = false;
+  bool hideAlbumArt = false;
+  bool hideTitle = false;
+  bool hideArtist = false;
+  bool hideControls = false;
+  bool showProgress = false;
+};
 
   MediaWidget(MprisService* mpris, HttpClient* httpClient, wl_output* output, Options options);
 
@@ -57,7 +58,8 @@ private:
   void syncProgress(const std::optional<MprisPlayerInfo>& active);
   [[nodiscard]] bool progressFillEligible(const std::optional<MprisPlayerInfo>& active) const noexcept;
   [[nodiscard]] std::optional<MprisPlayerInfo> activePlayer() const;
-  [[nodiscard]] static std::string buildDisplayText(const MprisPlayerInfo& player, bool hideArtist, bool artistFirst);
+  [[nodiscard]] static std::string buildDisplayText(
+    const MprisPlayerInfo& player, bool hideTitle, bool hideArtist);
 
   MprisService* m_mpris = nullptr;
   HttpClient* m_httpClient = nullptr;
@@ -68,8 +70,9 @@ private:
   bool m_hideWhenNoMedia = false;
   bool m_albumArtOnly = false;
   bool m_hideAlbumArt = false;
+  bool m_hideTitle = false;
   bool m_hideArtist = false;
-  bool m_artistFirst = false;
+  bool m_hideControls = false;
   bool m_showProgress = false;
   // Cached from the last doLayout(); the update phase has no container extents of its own.
   bool m_isVertical = false;

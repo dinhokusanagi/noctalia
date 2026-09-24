@@ -281,7 +281,6 @@ std::unique_ptr<DesktopWidget> DesktopWidgetFactory::create(
         .waveThickness = getFloatSetting(settings, "wave_thickness", 1.0F),
         .innerDiameter = getFloatSetting(settings, "inner_diameter", 0.7F),
         .fadeWhenIdle = getBoolSetting(settings, "fade_when_idle", true),
-        .blur = getBoolSetting(settings, "blur", false),
         .opacity = getFloatSetting(settings, "opacity", 100.0F) / 100.0F,
         .primaryColor = getColorSpecSetting(settings, "primary_color", colorSpecFromRole(ColorRole::Primary)),
         .secondaryColor = getColorSpecSetting(settings, "secondary_color", colorSpecFromRole(ColorRole::Secondary)),

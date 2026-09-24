@@ -29,8 +29,11 @@ MediaWidget::MediaWidget(MprisService* mpris, HttpClient* httpClient, wl_output*
     : m_mpris(mpris), m_httpClient(httpClient), m_maxWidth(static_cast<float>(options.maxWidth)),
       m_minWidth(static_cast<float>(options.minWidth)), m_artSize(static_cast<float>(options.artSize)),
       m_titleScrollMode(options.titleScrollMode), m_hideWhenNoMedia(options.hideWhenNoMedia),
-      m_albumArtOnly(options.albumArtOnly), m_hideAlbumArt(options.hideAlbumArt), m_hideArtist(options.hideArtist),
-      m_artistFirst(options.artistFirst), m_showProgress(options.showProgress) {}
+      m_hideAlbumArt(options.hideAlbumArt),
+      m_hideTitle(options.hideTitle),
+      m_hideArtist(options.hideArtist),
+      m_hideControls(options.hideControls),
+      m_showProgress(options.showProgress) {}
 
 void MediaWidget::create() {
   auto area = ui::inputArea({});
@@ -159,16 +162,16 @@ void MediaWidget::doLayout(Renderer& renderer, float containerWidth, float conta
   m_emptyGlyph->setColor(colorSpecFromRole(ColorRole::OnSurfaceVariant));
   m_emptyGlyph->measure(renderer);
 
-  const bool hideAlbumArt = m_hideAlbumArt && !m_isVertical;
-  const bool showArtSlot = !hideAlbumArt && m_art->hasImage();
+  const bool hideAlbumArt = m_hideAlbumArt;
+  const bool artHasImage = m_art->hasImage();
+  const bool showArtSlot = !hideAlbumArt && artHasImage;
 
   // Clamp art to the label's single-line height so oversized art_size cannot
   // distort the bar capsule. The bar uses a uniform cross-axis extent derived
   // from the same reference metrics.
   float artSize = 0.0F;
   if (showArtSlot) {
-    const float requestedArtSize = m_artSize * m_contentScale;
-    artSize = artOnly ? requestedArtSize : std::min(requestedArtSize, m_label->height());
+    artSize = m_artSize * m_contentScale;
     m_art->setVisible(true);
     m_art->setSize(artSize, artSize);
     m_art->setRadius(artSize * 0.5F);
@@ -226,30 +229,55 @@ void MediaWidget::doLayout(Renderer& renderer, float containerWidth, float conta
     }
     const float contentWidth = showLabel ? m_label->x() + m_label->width()
                                          : (showArtSlot ? artSize : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
-    rootNode->setSize(std::clamp(contentWidth, minLength, maxLength), contentHeight);
+    const float finalWidth =
+        contentWidth > 0.0F
+            ? (showArtSlot && !showLabel
+                   ? std::clamp(contentWidth, 0.0F, maxLength)
+                   : std::clamp(contentWidth, minLength, maxLength))
+            : 0.0F;
+
+    rootNode->setSize(finalWidth, contentHeight);
   }
+
   // Media controls follow the artwork and stay aligned on the bar.
-  const float controlsGap = Style::spaceXs * m_contentScale;
-  const float buttonSize = Style::baseGlyphSize * 1.8F * m_contentScale;
-  const float contentEnd = showLabel ? m_label->x() + m_label->width()
-                                     : (showArtSlot ? artSize : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
+  const bool showControls = !m_hideControls;
 
-  const float controlsX = contentEnd > 0.0F ? contentEnd + controlsGap : 0.0F;
-  const float controlsY = std::round((contentHeight - buttonSize) * 0.5F);
+  const float contentOnlyWidth = rootNode->width();
 
-  if (!artOnly) {
+  m_previousButton->setVisible(showControls);
+  m_playPauseButton->setVisible(showControls);
+  m_nextButton->setVisible(showControls);
+
+  if (showControls) {
+    const float controlsGap = Style::spaceXs * m_contentScale;
+    const float buttonSize = Style::baseGlyphSize * 1.8F * m_contentScale;
+
+    const float contentEnd =
+        showLabel ? m_label->x() + m_label->width()
+                  : (showArtSlot ? artSize
+                                 : (showEmptyGlyph ? m_emptyGlyph->width() : 0.0F));
+
+    const float controlsX =
+        contentEnd > 0.0F ? contentEnd + controlsGap : 0.0F;
+
+    const float controlsY =
+        std::round((contentHeight - buttonSize) * 0.5F);
+
     const float requiredWidth = controlsX + buttonSize * 3.0F;
-    rootNode->setSize(std::max(rootNode->width(), requiredWidth), rootNode->height());
+
+    rootNode->setSize(
+        std::max(contentOnlyWidth, requiredWidth),
+        rootNode->height());
+
+    m_previousButton->setSize(buttonSize, buttonSize);
+    m_previousButton->setPosition(controlsX, controlsY);
+
+    m_playPauseButton->setSize(buttonSize, buttonSize);
+    m_playPauseButton->setPosition(controlsX + buttonSize, controlsY);
+
+    m_nextButton->setSize(buttonSize, buttonSize);
+    m_nextButton->setPosition(controlsX + buttonSize * 2.0F, controlsY);
   }
-
-  m_previousButton->setSize(buttonSize, buttonSize);
-  m_previousButton->setPosition(controlsX, controlsY);
-
-  m_playPauseButton->setSize(buttonSize, buttonSize);
-  m_playPauseButton->setPosition(controlsX + buttonSize, controlsY);
-
-  m_nextButton->setSize(buttonSize, buttonSize);
-  m_nextButton->setPosition(controlsX + buttonSize * 2.0F, controlsY);
 
   m_progressBar->setVisible(showProgressFill);
   if (showProgressFill) {
@@ -350,7 +378,7 @@ void MediaWidget::syncState(Renderer& renderer, const std::optional<MprisPlayerI
 
   if (active.has_value()) {
     playbackStatus = active->playbackStatus;
-    displayText = buildDisplayText(*active, m_hideArtist, m_artistFirst);
+    displayText = buildDisplayText(*active, m_hideTitle, m_hideArtist);
     artUrl = effectiveArtUrl(*active);
   }
 
@@ -412,7 +440,7 @@ void MediaWidget::syncState(Renderer& renderer, const std::optional<MprisPlayerI
     const std::string artPath = cachedArtworkPath(m_lastArtUrl);
     if (!artPath.empty()) {
       if (m_art->setSourceFile(renderer, artPath, artDecodePx, false, true)) {
-        requestRedraw();
+        requestUpdate();
       }
     }
   }
@@ -424,28 +452,38 @@ void MediaWidget::syncState(Renderer& renderer, const std::optional<MprisPlayerI
   }
 }
 
-std::string MediaWidget::buildDisplayText(const MprisPlayerInfo& player, bool hideArtist, bool artistFirst) {
+std::string MediaWidget::buildDisplayText(
+    const MprisPlayerInfo& player, bool hideTitle, bool hideArtist) {
+  const std::string title = hideTitle ? std::string() : player.title;
   const std::string artists = hideArtist ? std::string() : joinArtists(player.artists);
-  if (!player.title.empty() && !artists.empty()) {
-    if (artistFirst) {
-      return artists + " - " + player.title;
-    }
-    return player.title + " - " + artists;
+
+  if (!title.empty() && !artists.empty()) {
+    return title + " - " + artists;
   }
-  if (!player.title.empty()) {
-    return player.title;
+
+  if (!title.empty()) {
+    return title;
   }
+
   if (!artists.empty()) {
     return artists;
   }
+
+  if (hideTitle && hideArtist) {
+    return {};
+  }
+
   if (!player.identity.empty()) {
     return player.identity;
   }
+
   if (!player.busName.empty()) {
     return player.busName;
   }
+
   if (player.playbackStatus == "Playing") {
     return i18n::tr("bar.widgets.media.playing");
   }
+
   return i18n::tr("bar.widgets.media.nothing-playing");
 }

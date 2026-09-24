@@ -48,7 +48,7 @@ void FancyAudioVisualizer::setRotationSpeed(float speed) {
 
 void FancyAudioVisualizer::setBarWidth(float width) {
   auto next = style();
-  next.barWidth = std::clamp(width, 0.2F, 250.0F);
+  next.barWidth = std::clamp(width, 0.2F, 1.0F);
   setStyle(next);
 }
 

@@ -36,8 +36,10 @@ DesktopFancyAudioVisualizerWidget::DesktopFancyAudioVisualizerWidget(PipeWireSpe
       m_rotationSpeed(options.rotationSpeed), m_barWidth(options.barWidth), m_ringOpacity(options.ringOpacity),
       m_bloomIntensity(options.bloomIntensity), m_waveThickness(options.waveThickness),
       m_innerDiameter(options.innerDiameter), m_fadeWhenIdle(options.fadeWhenIdle),
-      m_blur(options.blur), m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)),
-      m_primaryColor(options.primaryColor), m_secondaryColor(options.secondaryColor) {}
+      m_opacity(std::clamp(options.opacity, 0.0F, 1.0F)),
+      m_primaryColor(options.primaryColor), m_secondaryColor(options.secondaryColor) {
+  setBlurEnabled(true);
+}
 
 DesktopFancyAudioVisualizerWidget::~DesktopFancyAudioVisualizerWidget() {
   cancelVisibilityAnimation();
@@ -119,30 +121,21 @@ bool DesktopFancyAudioVisualizerWidget::applySetting(
     return false;
   }
 
-  if (key == "blur") {
-    if (const auto* v = std::get_if<bool>(&value)) {
-      m_blur = *v;
-      requestRedraw();
-      return true;
+  if (key == "opacity") {
+    if (const auto* v = std::get_if<double>(&value)) {
+      m_opacity = std::clamp(static_cast<float>(*v) / 100.0F, 0.0F, 1.0F);
+    } else if (const auto* v = std::get_if<std::int64_t>(&value)) {
+      m_opacity = std::clamp(static_cast<float>(*v) / 100.0F, 0.0F, 1.0F);
+    } else {
+      return false;
     }
-    return false;
-}
 
-if (key == "opacity") {
-  if (const auto* v = std::get_if<double>(&value)) {
-    m_opacity = std::clamp(static_cast<float>(*v) / 100.0F, 0.0F, 1.0F);
-  } else if (const auto* v = std::get_if<std::int64_t>(&value)) {
-    m_opacity = std::clamp(static_cast<float>(*v) / 100.0F, 0.0F, 1.0F);
-  } else {
-    return false;
+    if (root() != nullptr && !m_fadingOut) {
+      root()->setOpacity(m_opacity);
+    }
+
+    return true;
   }
-
-  if (root() != nullptr && !m_fadingOut) {
-    root()->setOpacity(m_opacity);
-  }
-
-  return true;
-}
 
   if (key == "sensitivity"
       || key == "rotation_speed"

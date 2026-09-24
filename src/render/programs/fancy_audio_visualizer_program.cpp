@@ -233,7 +233,7 @@ vec4 computeBars(vec2 uv, float iTime, float bass, float mid, float highMid, flo
         float adjustedTheta = theta + PI + iTime * u_rotation_speed * 0.2;
         float m = mod(adjustedTheta, section);
         float ym = d * sin(center - m);
-        float barW = (u_bar_width / 250.0) * 0.25;
+        float barW = u_bar_width * 0.015;
 
         if (abs(ym) < barW) {
             float circlePos = mod(adjustedTheta, TWOPI) / TWOPI;
